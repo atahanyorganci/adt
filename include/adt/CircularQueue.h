@@ -18,6 +18,9 @@ class CircularQueue {
     bool getFront(T &data) const;
 
   private:
+    void copy(const CircularQueue<T> &queue);
+    void destroy();
+
     T *data;
     size_t size, start, end;
     int count;
@@ -25,32 +28,23 @@ class CircularQueue {
 
 template <typename T>
 inline CircularQueue<T>::CircularQueue()
-    : size(20), start(0), end(0), count(0) {
+    : data(nullptr), size(20), start(0), end(0), count(0) {
     data = new T[20];
 }
 
 template <typename T>
 inline CircularQueue<T>::CircularQueue(const size_t size)
-    : size(size), start(0), end(0), count(0) {
+    : data(nullptr), size(size), start(0), end(0), count(0) {
     data = new T[size];
 }
 
 template <typename T>
-inline CircularQueue<T>::CircularQueue(const CircularQueue<T> &queue)
-    : size(queue.size), start(queue.start), end(queue.end), count(queue.count) {
-    data = new T[size];
-    for (size_t i = 0; i < size; i++) {
-        data[i] = queue.data[i];
-    }
+inline CircularQueue<T>::CircularQueue(const CircularQueue<T> &queue) {
+    copy(queue);
 }
 
 template <typename T>
-inline CircularQueue<T> &
-CircularQueue<T>::operator=(const CircularQueue<T> &queue) {
-    if (this == &queue)
-        return *this;
-    if (data != nullptr)
-        delete data;
+inline void CircularQueue<T>::copy(const CircularQueue<T> &queue) {
     size = queue.size;
     start = queue.start;
     end = queue.end;
@@ -59,13 +53,26 @@ CircularQueue<T>::operator=(const CircularQueue<T> &queue) {
     for (size_t i = 0; i < size; i++) {
         data[i] = queue.data[i];
     }
+}
+
+template <typename T>
+inline void CircularQueue<T>::destroy() {
+    delete[] data;
+}
+
+template <typename T>
+inline CircularQueue<T> &
+CircularQueue<T>::operator=(const CircularQueue<T> &queue) {
+    if (this == &queue)
+        return *this;
+    destroy();
+    copy(queue);
     return *this;
 }
 
 template <typename T>
 inline CircularQueue<T>::~CircularQueue() {
-    if (data != nullptr)
-        delete data;
+    destroy();
 }
 
 template <typename T>
