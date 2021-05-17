@@ -7,11 +7,11 @@ TEST_CASE("ListTest", "[List]") {
     int data = 0;
 
     // empty list edge cases
-    REQUIRE(l.isEmpty());
-    REQUIRE(l.getCount() == 0);
+    REQUIRE(l.is_empty());
+    REQUIRE(l.len() == 0);
     REQUIRE_FALSE(l.insert(3, 3));
     REQUIRE_FALSE(l.insert(1, 3));
-    REQUIRE_FALSE(l.getItem(1, data));
+    REQUIRE_FALSE(l.get(1, data));
 
     // copy constructor, and assignment operator
     auto l2 = List<int>(l);
@@ -20,13 +20,13 @@ TEST_CASE("ListTest", "[List]") {
     l3 = l;
 
     // add data
-    size_t count = static_cast<size_t>(l.getSize()) / 2;
+    size_t count = l.capacity() / 2;
     UNSCOPED_INFO("Adding data until list half is full.");
     for (size_t i = 0; i < count; i++)
         REQUIRE(l.insert(0, i));
-    REQUIRE_FALSE(l.isEmpty());
-    REQUIRE(static_cast<size_t>(l.getCount()) == count);
-    REQUIRE_FALSE(l.getItem(count, data));
+    REQUIRE_FALSE(l.is_empty());
+    REQUIRE(l.len() == count);
+    REQUIRE_FALSE(l.get(count, data));
 
     // copy constructor, and assignment operator
     auto l4 = List<int>(l);
@@ -35,17 +35,17 @@ TEST_CASE("ListTest", "[List]") {
     l5 = l;
 
     // resizing shouldn't leak memory
-    count = static_cast<size_t>(l.getCount());
+    count = l.len();
     REQUIRE_FALSE(l.resize(count - 1));
     REQUIRE(l.resize(count));
     REQUIRE_FALSE(l.insert(0, 1));
     REQUIRE(l.resize(SIZE));
 
     // fill rest of the list
-    size_t remaining = SIZE - static_cast<size_t>(l.getCount());
+    size_t remaining = SIZE - l.len();
     for (size_t i = 0; i < remaining; i++)
         REQUIRE(l.insert(0, i));
-    REQUIRE(l.getCount() == l.getSize());
+    REQUIRE(l.len() == l.capacity());
     REQUIRE_FALSE(l.insert(1, 2));
 
     // copy constructor, and assignment operator
@@ -55,16 +55,16 @@ TEST_CASE("ListTest", "[List]") {
     l7 = l;
 
     // Remove all items from the list
-    count = static_cast<size_t>(l.getSize());
+    count = l.capacity();
     for (size_t i = 0; i < count; i++)
         REQUIRE(l.remove(0));
     REQUIRE_FALSE(l.remove(1));
-    REQUIRE(l.isEmpty());
+    REQUIRE(l.is_empty());
 
     // Test newly added members
     const int new_data = 10;
     REQUIRE(l.insert(0, new_data));
-    REQUIRE(l.getItem(0, data));
+    REQUIRE(l.get(0, data));
     REQUIRE(data == new_data);
     REQUIRE(l.remove(0));
 }

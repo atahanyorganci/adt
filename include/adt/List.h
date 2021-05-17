@@ -4,32 +4,31 @@
 
 template <typename T>
 class List {
-  private:
-    T *data;
-    int size;
-    int count;
-
   public:
     List(size_t size = 20);
     List(const List<T> &list);
     ~List();
-    bool isEmpty() const;
-    int getSize() const;
-    int getCount() const;
-    bool getItem(int index, T &item) const;
-    bool insert(int index, T item);
-    bool remove(int index);
-    bool resize(int size);
+    bool is_empty() const { return count == 0; }
+    size_t len() const { return count; }
+    size_t capacity() const { return size; }
+    bool get(int idx, T &item) const;
+    bool insert(int idx, T item);
+    bool remove(int idx);
+    bool resize(int new_size);
     List<T> &operator=(const List<T> &list);
     template <typename U>
     friend std::ostream &operator<<(std::ostream &out, const List<U> &list);
 
   private:
-    void copyList(const List<T> &list);
+    void copy(const List<T> &list);
+
+    T *data;
+    size_t size;
+    size_t count;
 };
 
 template <typename T>
-inline void List<T>::copyList(const List<T> &list) {
+inline void List<T>::copy(const List<T> &list) {
     size = list.size;
     count = list.count;
     data = new T[size];
@@ -42,15 +41,13 @@ inline List<T> &List<T>::operator=(const List<T> &list) {
     if (this != &list)
         return *this;
     delete[] data;
-    copyList(list);
+    copy(list);
     return *this;
 }
 
 template <typename T>
 inline List<T>::List(const List<T> &list) {
-    if (this == &list)
-        return;
-    copyList(list);
+    copy(list);
 }
 
 template <typename T>
@@ -60,70 +57,69 @@ inline List<T>::List(size_t size) : size(size), count(0) {
 
 template <typename T>
 inline List<T>::~List() {
-    if (size > 0)
+    if (data)
         delete[] data;
 }
 
 template <typename T>
-inline bool List<T>::isEmpty() const {
-    return count == 0;
-}
-
-template <typename T>
-inline int List<T>::getSize() const {
-    return size;
-}
-
-template <typename T>
-inline int List<T>::getCount() const {
-    return count;
-}
-
-template <typename T>
-inline bool List<T>::getItem(int index, T &item) const {
-    if (index < 0 || index >= count)
+inline bool List<T>::get(int idx, T &item) const {
+    if (idx < 0)
+        return false;
+    auto index = static_cast<size_t>(idx);
+    if (index >= count)
         return false;
     item = data[index];
     return true;
 }
 
 template <typename T>
-inline bool List<T>::insert(int index, T item) {
-    if (index < 0 || index > count || count == size)
+inline bool List<T>::insert(int idx, T item) {
+    if (idx < 0)
         return false;
-    for (size_t i = static_cast<size_t>(count); i > static_cast<size_t>(index);
-         i--)
+    auto index = static_cast<size_t>(idx);
+    if (index > count || count == size)
+        return false;
+
+    for (size_t i = count; i > index; i--) {
         data[i] = data[i - 1];
+    }
     data[index] = item;
     count++;
     return true;
 }
 
 template <typename T>
-inline bool List<T>::remove(int index) {
-    if (index < 0)
+inline bool List<T>::remove(int idx) {
+    if (idx < 0)
         return false;
+    auto index = static_cast<size_t>(idx);
     if (index > count || count == 0)
         return false;
+
     count--;
-    for (size_t i = 0; i < static_cast<size_t>(count); i++) {
-        if (i < static_cast<size_t>(index))
+    for (size_t i = 0; i < count; i++) {
+        if (i < index) {
             continue;
-        else
+        } else {
             data[i] = data[i + 1];
+        }
     }
     return true;
 }
 
 template <typename T>
-inline bool List<T>::resize(int newSize) {
-    if (newSize < 0 || newSize < count)
+inline bool List<T>::resize(int new_size) {
+    if (new_size < 0)
         return false;
-    auto temp = new T[newSize];
-    for (size_t i = 0; i < static_cast<size_t>(count); i++)
+    auto new_size_t = static_cast<size_t>(new_size);
+    if (new_size_t < count)
+        return false;
+
+    auto temp = new T[new_size_t];
+    for (size_t i = 0; i < count; i++)
         temp[i] = data[i];
     delete[] data;
-    size = newSize;
+    size = new_size_t;
     data = temp;
     return true;
 }
